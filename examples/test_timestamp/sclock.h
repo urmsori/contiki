@@ -20,13 +20,19 @@ struct sclock{
 };
 void sclock_update(struct sclock *sc);
 void sclock_init(struct sclock *sc);
-int sclock_rtimer_set(struct rtimer* rt, struct timestamp *interval, rtimer_callback_t func, void *ptr, struct sclock *sc);
+void sclock_rtimer_set(struct sclock *sc, struct rtimer* rt, struct timestamp *interval, rtimer_callback_t func, void *ptr);
+int sclock_rtimer_set_long(struct sclock *sc, struct rtimer* rt, struct timestamp *interval, rtimer_callback_t func, void *ptr);
+void sclock_hold_time(struct sclock *sc, struct timestamp *interval);
 /* sclock_rtimer_set README
  * 
+ * interval < 1min : sclock_rtimer_set, stimer_hold_time : interval not changed
+ * interval > 1min : sclock_rtimer_set_long              : interval changed
+ * 
+ * < Example >
  * PT_BEGIN(&pt);
  * while(1){
  *  while(timestamp_is_empty(&interval)){
- *   if( sclock_rtimer_set(rt,interval,sc,pt,(void (*)(struct rtimer *, void *))func,ptr) > 0 ){
+ *   if( sclock_rtimer_set_long(rt,interval,sc,pt,(void (*)(struct rtimer *, void *))func,ptr) > 0 ){
  *   PT_YIELD(&pt);
  *  }
  * }

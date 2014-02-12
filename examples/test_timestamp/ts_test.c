@@ -7,7 +7,8 @@
 #define TEST1 0
 #define TEST2 0
 #define TEST3 0
-#define TEST4 1
+#define TEST4 0
+#define TEST5 1
 
 static void print_packet(uint8_t *packet, int len)
 {
@@ -51,18 +52,18 @@ char pt_func(struct rtimer* t, void *ptr){
   timestamp_init(&duration);
   printf("ddd\n");
   while(1){
-    duration.min = 1;
+    //duration.min = 1;
     duration.sec = 1;
-    while(!timestamp_is_empty(&duration)){
+    //while(!timestamp_is_empty(&duration)){
       sclock_update(&sc);
       printf("----\n");
       print_timestamp(&(sc.now));
       print_timestamp(&duration);
       
-      sclock_rtimer_set(t,&duration,(void (*)(struct rtimer *, void *))pt_func,ptr,&sc);
+      sclock_rtimer_set(&sc,t,&duration,(void (*)(struct rtimer *, void *))pt_func,ptr);
       PT_YIELD(&pt);
       printf("done\n");
-    }
+      //}
   }
   PT_END(&pt);
 
@@ -76,6 +77,22 @@ PROCESS_THREAD(ts_test, ev, data)
 {
   PROCESS_BEGIN();
   PT_INIT(&pt);
+
+#if TEST5
+  static struct sclock sc;
+  sclock_init(&sc);
+  static struct timestamp duration;
+  timestamp_init(&duration);
+  duration.sec = 1;
+  while(1){
+    printf("start\n");
+    sclock_update(&sc);
+    print_timestamp(&(sc.now));
+    sclock_hold_time(&sc, &duration);
+    printf("end\n");
+  }
+#endif
+
 
 #if TEST4
   static struct rtimer rtt;

@@ -70,9 +70,9 @@
 /* Network setup for non-IPv6 (rime). */
 
 #define NETSTACK_CONF_NETWORK rime_driver
-#define NETSTACK_CONF_MAC     nullmac_driver
-//#define NETSTACK_CONF_RDC     cxmac_driver
-#define NETSTACK_CONF_RDC     plb_driver
+#define NETSTACK_CONF_MAC     csma_driver
+#define NETSTACK_CONF_RDC     xmac_driver
+//#define NETSTACK_CONF_RDC     plb_driver
 #define NETSTACK_CONF_FRAMER  framer_802154
 
 #define CC2420_CONF_AUTOACK              1

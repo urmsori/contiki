@@ -30,10 +30,8 @@ sclock_update(struct sclock *sc)
   timestamp_plus(&(sc->now),&ts_calc);
 }
 
-int sclock_rtimer_set(struct rtimer* rt, struct timestamp *interval, rtimer_callback_t func, void *ptr, struct sclock *sc)
+int sclock_rtimer_set_long(struct sclock *sc, struct rtimer* rt, struct timestamp *interval, rtimer_callback_t func, void *ptr)
 {
-  struct timestamp duration_tmp;
-  timestamp_cpy(&duration_tmp, interval);
   struct timestamp amin;
   rtimer_clock_t tick;
   timestamp_init(&amin);
@@ -49,7 +47,6 @@ int sclock_rtimer_set(struct rtimer* rt, struct timestamp *interval, rtimer_call
   }
   else{
     tick = (interval->msec+(interval->sec*(MSEC_MAX+1)))*(sc->slope)/SCLOCK_UNIT_MSEC;
-    printf("tick: %u, %u\n",tick,RTIMER_ARCH_SECOND);
     rtimer_set(rt, RTIMER_NOW()+tick, 1,
 	       (void (*)(struct rtimer *, void *))func, ptr);
     timestamp_init(interval);
@@ -57,7 +54,19 @@ int sclock_rtimer_set(struct rtimer* rt, struct timestamp *interval, rtimer_call
   }
 
 }
-int stimer_hold_time(struct timestamp *duration)
+void sclock_rtimer_set(struct sclock *sc, struct rtimer* rt, struct timestamp *interval, rtimer_callback_t func, void *ptr)
 {
-  return 0;
+  rtimer_clock_t tick;
+  tick = (interval->msec+(interval->sec*(MSEC_MAX+1)))*(sc->slope)/SCLOCK_UNIT_MSEC;
+  rtimer_set(rt, RTIMER_NOW()+tick, 1,
+	     (void (*)(struct rtimer *, void *))func, ptr);
+}
+
+void sclock_hold_time(struct sclock *sc, struct timestamp *interval)
+{
+  rtimer_clock_t tick;
+  rtimer_clock_t now = RTIMER_NOW();
+  tick = (interval->msec+(interval->sec*(MSEC_MAX+1)))*(sc->slope)/SCLOCK_UNIT_MSEC;
+  
+  while(RTIMER_CLOCK_LT(RTIMER_NOW(), now+tick)){}
 }
