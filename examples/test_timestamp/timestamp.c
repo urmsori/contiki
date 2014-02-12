@@ -78,13 +78,19 @@ void timestamp_init(struct timestamp *ts)
   ts->sec = 0;
   ts->msec = 0;
 }
+void timestamp_cat(struct timestamp *dst, struct timestamp *src)
+{
+  dst->year = src->year;
+  dst->month = src->month;
+  dst->day = src->day;
+  dst->hour = src->hour;
+  dst->min = src->min;
+  dst->sec = src->sec;
+  dst->msec = src->msec;
+}
 
 int timestamp_plus(struct timestamp *dst, struct timestamp *src)
 {
-  printf("plus\n");
-  if(timestamp_is_overflow(src)){
-    return -1;
-  }
   dst->year += src->year;
   dst->month += src->month;
   dst->hour += src->hour;
@@ -98,11 +104,6 @@ int timestamp_plus(struct timestamp *dst, struct timestamp *src)
 
 int timestamp_minus(struct timestamp *dst, struct timestamp *src)
 {
-  printf("minus\n");
-  if(timestamp_is_overflow(src)){
-    return -1;
-  }
-
   if(dst->msec < src->msec){
     src->sec++;
     dst->msec = (dst->msec + (MSEC_MAX+1)) - src->msec;
@@ -321,6 +322,72 @@ void timestamp_from_packet(struct timestamp *ts, uint8_t *packet, int start_inde
 
 
 }
+
+int timestamp_cmp(struct timestamp *rt, struct timestamp *lt)
+{
+  if(rt->year < lt->year){
+    return -1;
+  }
+  else if(rt->year > lt->year){
+    return 1;
+  }
+
+  if(rt->month < lt->month){
+    return -1;
+  }
+  else if(rt->month > lt->month){
+    return 1;
+  }
+
+  if(rt->day < lt->day){
+    return -1;
+  }
+  else if(rt->day > lt->day){
+    return 1;
+  }
+
+  if(rt->hour < lt->hour){
+    return -1;
+  }
+  else if(rt->hour > lt->hour){
+    return 1;
+  }
+
+  if(rt->min < lt->min){
+    return -1;
+  }
+  else if(rt->min > lt->min){
+    return 1;
+  }
+
+  if(rt->sec < lt->sec){
+    return -1;
+  }
+  else if(rt->sec > lt->sec){
+    return 1;
+  }
+
+  if(rt->msec < lt->msec){
+    return -1;
+  }
+  else if(rt->msec > lt->msec){
+    return 1;
+  }
+
+  return 0;
+}
+
+void timestamp_cpy(struct timestamp *dst, struct timestamp *src)
+{
+  dst->year = src->year;
+  dst->month = src->month;
+  dst->day = src->day;
+  dst->hour = src->hour;
+  dst->min = src->min;
+  dst->sec = src->sec;
+  dst->msec = src->msec;
+}
+
 
 void print_timestamp(struct timestamp *ts)
 {

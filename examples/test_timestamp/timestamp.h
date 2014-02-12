@@ -38,6 +38,13 @@ enum timestamp_type{
 void timestamp_init(struct timestamp *ts);
 int timestamp_to_packet(struct timestamp *ts, uint8_t *packet, int start_index);
 void timestamp_from_packet(struct timestamp *ts, uint8_t *packet, int start_index);
+void timestamp_cat(struct timestamp *dst, struct timestamp *src);
+int timestamp_plus(struct timestamp *dst, struct timestamp *src);
+int timestamp_minus(struct timestamp *dst, struct timestamp *src);
+int timestamp_arrange(struct timestamp *ts);
+int timestamp_cmp(struct timestamp *rt, struct timestamp *lt);
+void timestamp_cpy(struct timestamp *dst, struct timestamp *src);
+int timestamp_is_empty(struct timestamp *ts);
 
 void print_timestamp(struct timestamp *ts);
 

@@ -1,0 +1,9 @@
+  if(rt->msec < lt->msec){
+    return 1;
+  }
+  else if(rt->msec == lt->msec){
+    return 0;
+  }
+  else{
+    return -1;
+  }
