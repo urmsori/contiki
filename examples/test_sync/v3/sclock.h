@@ -8,7 +8,7 @@
 
 /* #define SLOPE_INIT CLOCK_SECOND */
 #define SCLOCK_UNIT_MSEC 10
-#define SCLOCK_SLOPE_INIT 1*SCLOCK_UNIT_MSEC
+#define SCLOCK_SLOPE_INIT ((RTIMER_ARCH_SECOND/1000)*SCLOCK_UNIT_MSEC)
 #define stimer_callback_t rtimer_callback_t
 #define RTIMER_CLOCK_T_MAX 65535
 

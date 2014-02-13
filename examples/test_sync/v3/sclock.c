@@ -65,6 +65,7 @@ void sclock_rtimer_set(struct sclock *sc, struct rtimer* rt, struct timestamp *i
 {
   rtimer_clock_t tick;
   tick = (interval->msec+(interval->sec*(MSEC_MAX+1)))*(sc->slope)/SCLOCK_UNIT_MSEC;
+  printf("tick:%d, %d, %d\n",70*100, (interval->msec+(interval->sec*(MSEC_MAX+1))), (sc->slope));
   rtimer_set(rt, RTIMER_NOW()+tick, 1,
 	     (void (*)(struct rtimer *, void *))func, ptr);
 }

@@ -85,7 +85,7 @@ static void wrap()
   printf("aaaaa\n");
   call3(&rt, NULL);
 }
-
+make
 /*---------------------------------------------------------------------------*/
 PROCESS(pttest, "Protothread test");
 AUTOSTART_PROCESSES(&pttest);

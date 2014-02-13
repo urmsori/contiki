@@ -1,5 +1,5 @@
 #include "contiki.h"
-#include "dev/leds.h"
+//#include "dev/leds.h"
 #include "ntp.h"
 #include "sclock.h"
 #include "net/rime.h"
@@ -32,10 +32,12 @@ char loop(struct rtimer* t, void *ptr){
   second.sec = 1;
 
   while(1) {
+    printf("jjj\n");
     sclock_rtimer_set(&sclk, t, &second, (void (*)(struct rtimer *, void *))loop, NULL);
     PT_YIELD(&pt);
+    printf("ddd\n");
     
-    leds_invert(LEDS_RED);
+    // leds_invert(LEDS_RED);
 
 #if HOST
     packet_len = ntp_make_request(&ntp, &packet); 
