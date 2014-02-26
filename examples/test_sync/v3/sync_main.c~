@@ -1,0 +1,133 @@
+#include "contiki.h"
+#include "dev/leds.h"
+#include "ntp.h"
+#include "sclock.h"
+#include "net/rime.h"
+#include "sys/rtimer.h"
+#include "sys/pt.h"
+
+#include <stdio.h>
+#include <sys/clock.h>
+
+#define REQUEST 0
+
+static struct sclock sclk;
+static struct rtimer rt;
+static struct etimer et;
+static struct pt pt;
+static struct ntp ntp;
+//void print_leds();
+static struct abc_conn abc;
+static void ntp_recv_packet(struct abc_conn *c);
+static const struct abc_callbacks abc_call = {ntp_recv_packet};
+/*---------------------------------------------------------------------------*/
+
+char loop(struct rtimer* t, void *ptr){
+  PT_BEGIN(&pt);
+  uint8_t packet[TIMESTAMP_BIT];
+  int packet_len = 0;
+
+  sclock_init(&sclk, TYPE_CLOCK);
+  ntp_init(&ntp, &sclk);
+
+  static struct timestamp second;
+  timestamp_init(&second);
+  second.sec = 1;
+
+  while(1) {
+    sclock_etimer_set(&sclk, &et, &second);
+    PT_YIELD_UNTIL(&pt,etimer_expired(&et));
+    leds_invert(LEDS_RED);
+
+#if REQUEST
+    packet_len = ntp_make_request(&ntp, packet); 
+    packetbuf_copyfrom(packet, packet_len);
+    abc_send(&abc);
+#endif
+  }
+
+  PT_END(&pt);
+}
+
+/*---------------------------------------------------------------------------*/
+static void ntp_recv_packet(struct abc_conn *c)
+{  
+uint8_t* recv = (uint8_t *)packetbuf_dataptr();
+#if REQUEST
+  ntp_handle_ack(&ntp, recv);
+#else
+  uint8_t send[1+TIMESTAMP_BYTE*3];
+  int send_len;
+  send_len = ntp_make_ack(&ntp, send, recv);
+  packetbuf_copyfrom(send,send_len);
+  abc_send(&abc);
+#endif
+}
+/*---------------------------------------------------------------------------*/
+
+PROCESS(sync_main, "Sync main");
+AUTOSTART_PROCESSES(&sync_main);
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(sync_main, ev, data)
+{
+  /* static struct timer tm; */
+
+  PROCESS_EXITHANDLER(abc_close(&abc);)
+  PROCESS_BEGIN();
+  abc.ptr = (void*) &sclk;
+  abc_open(&abc, 128, &abc_call);
+  PT_INIT(&pt);
+clock_init();
+  //  loop(&rt, NULL);
+  uint8_t packet[TIMESTAMP_BIT];
+  int packet_len = 0;
+
+  sclock_init(&sclk, TYPE_CLOCK);
+  ntp_init(&ntp, &sclk);
+
+  static struct timestamp second;
+  timestamp_init(&second);
+  second.sec = 1;
+
+  while(1) {
+    sclock_etimer_set(&sclk, &et, &second);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    leds_invert(LEDS_RED);
+
+#if REQUEST
+    packet_len = ntp_make_request(&ntp, packet); 
+    packetbuf_copyfrom(packet, packet_len);
+    abc_send(&abc);
+#endif
+  }
+
+  /*  timer_set(&tm, CLOCK_SECOND);
+  while(1) {
+    if(timer_expired(&tm)){
+      leds_invert(LEDS_RED);
+      
+      packet = ntp_make_request(&sclk, &packet_len);
+      send_packet(packet, packet_len);
+      free(packet);
+      timer_set(&tm, CLOCK_SECOND);
+    }
+    }*/
+  
+  PROCESS_END();
+}
+/*---------------------------------------------------------------------------*/
+
+/*void
+print_leds(){
+  unsigned char ledst = leds_get();
+  int green, yellow, red;
+
+  green = ledst&LEDS_GREEN;
+  yellow = (ledst&LEDS_YELLOW)>>1;
+  red = (ledst&LEDS_RED)>>2;
+  
+  printf("ledfd:%u%u%u\n", yellow, green, red);
+  }*/
+
+
